@@ -12,5 +12,4 @@ const bookmarkReducer = (state = initialState, action) => {
     }
   }
 };
-
 export default bookmarkReducer;
