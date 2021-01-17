@@ -2,6 +2,8 @@ import React, {Component, useState} from 'react';
 import {Image, View, TouchableOpacity, Dimensions} from 'react-native';
 import {Text, Avatar, withStyles, List, Icon} from 'react-native-ui-kitten';
 import axios from 'axios';
+import {addBookmark} from '../actions/bookmarkActions';
+import {connect} from 'react-redux';
 const Header = () => (
   <View
     style={{justifyContent: 'space-between', flex: 1, flexDirection: 'row'}}>
@@ -97,15 +99,13 @@ class Feed extends Component {
           </View>
           <View
             style={{flex: 1, justifyContent: 'center', alignItems: 'flex-end'}}>
-            <Icon
-              name="bookmark-outline"
-              width={25}
-              height={25}
-              fill={'#111'}
+            <Bk
+              current={item}
+              bookmarks={this.props.bk}
+              addBk={() => this.props.addBk(item)}
             />
           </View>
         </View>
-
         <View
           style={{
             margin: 5,
@@ -121,6 +121,19 @@ class Feed extends Component {
             {<Status title={item.title} />}
           </View>
         </View>
+        <TouchableOpacity
+          style={{marginLeft: 5}}
+          onPress={() => this.props.navigation.navigate('Comments')}>
+          <Text
+            category="p2"
+            style={{
+              ...this.props.themedStyle.cardTitle,
+              fontWeight: 'bold',
+              color: 'grey',
+            }}>
+            View all comments
+          </Text>
+        </TouchableOpacity>
       </View>
     );
     return (
@@ -130,11 +143,24 @@ class Feed extends Component {
         onEndReachedThreshold={0.7}
         data={this.state.DATA}
         renderItem={renderItem}
-        keyExtractor={this.state.DATA.id}
+        keyExtractor={(item) => item.id}
       />
     );
   }
 }
+const Bk = ({current, bookmarks, addBk}) => {
+  const ids = bookmarks.map(({id}) => id);
+  return (
+    <TouchableOpacity onPress={() => addBk(current)}>
+      <Icon
+        name={ids.indexOf(current.id) > -1 ? 'bookmark' : 'bookmark-outline'}
+        width={25}
+        height={25}
+        fill={'#111'}
+      />
+    </TouchableOpacity>
+  );
+};
 const ImageFn = ({uri}) => {
   const [aspect, setH] = useState(1);
   Image.getSize(uri, (width, height) => {
@@ -169,7 +195,19 @@ const Status = ({title}) => {
       </Text>
     );
 };
-export default Feed = withStyles(Feed, (theme) => ({
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addBk: (data) => dispatch(addBookmark(data)),
+  };
+};
+
+const mapStateToProps = (state) => {
+  console.log(state.bookmarkReducer);
+  return {
+    bk: state.bookmarkReducer.bookmark,
+  };
+};
+Feed = withStyles(Feed, (theme) => ({
   container: {
     flex: 1,
   },
@@ -199,3 +237,5 @@ export default Feed = withStyles(Feed, (theme) => ({
     borderColor: theme['color-basic-600'],
   },
 }));
+
+export default connect(mapStateToProps, mapDispatchToProps)(Feed);

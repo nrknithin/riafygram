@@ -43,7 +43,7 @@ const TabNavigator = createBottomTabNavigator(
       navigationOptions: {
         tabBarIcon: ({focused}) => (
           <Icon
-            name="plus-square-outline"
+            name="bookmark-outline"
             width={32}
             height={32}
             fill={focused ? '#111' : '#939393'}
